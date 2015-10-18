@@ -38,6 +38,8 @@ The interval that contains the maximum number of steps is 835.
 
 The total number of rows with missing values is 2304.
 
+The daily average steps by day of the week will be used to imputate missing values.
+
 
 ```r
 dayIndex <- as.POSIXlt(actData$date)$wday 
