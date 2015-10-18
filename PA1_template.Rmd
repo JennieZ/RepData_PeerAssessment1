@@ -2,6 +2,7 @@ Reproducible Research - Peer Assessment 1
 =========================================
 
 ## Loading and preprocessing the data
+
 ```{r}
 actData <- read.csv("activity.csv", colClasses = "character")
 actData$steps <- as.numeric(actData$steps)
@@ -10,6 +11,7 @@ actData$interval <- as.integer(actData$interval)
 ```
 
 ## What is mean total number of steps taken per day?
+
 ```{r}
 totalSteps <- aggregate(steps ~ date, data = actData, sum)
 hist(totalSteps$steps, main = "Histogram of Total Number of Steps Taken Per Day")
@@ -23,8 +25,33 @@ dailyPattern <- aggregate(steps ~ interval, data = actData, mean)
 plot(dailyPattern, type = 'l')
 ```
 
+The interval that contains the maximum number of steps is `r dailyPattern$interval[dailyPattern$steps == max(dailyPattern$steps)]`.
+
 ## Imputing missing values
 
+The total number of rows with missing values is `r sum(is.na(actData))`.
+
+```{r}
+dayIndex <- as.POSIXlt(actData$date)$wday 
+impData <- cbind(actData, dayIndex)
+meanByDay <- aggregate(steps ~ dayIndex, data = impData, mean)
+imputeVal <- factor(impData$dayIndex, levels = meanByDay$dayIndex, labels = meanByDay$steps)
+imputeVal <- as.numeric(as.character(imputeVal))
+impData <- cbind(impData, imputeVal)
+impData$steps[is.na(impData$steps)] <- impData$imputeVal[is.na(impData$steps)]
+totalSteps <- aggregate(steps ~ date, data = impData, sum)
+hist(totalSteps$steps, main = "Histogram of Total Number of Steps Taken Per Day with Imputation")
+```
+
+The mean of the total number of steps taken per day is `r mean(totalSteps$steps, na.rm = TRUE)` and the median is `r median(totalSteps$steps, na.rm = TRUE)`. Imputing missing data has resulted in the increase of the mean and median. It has also increased the frequency of days with about average number of steps.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+dayType <- ifelse(impData$dayIndex > 0 & impData$dayIndex < 6, "weekday","weekend")
+impData <- cbind(impData, dayType)
+typeDiff <- aggregate(steps ~ interval + dayType, data = impData, mean)
+library(lattice)
+xyplot(steps ~ interval|dayType, data = typeDiff, layout = c(1,2), type = "l")
+```
