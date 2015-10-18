@@ -1,22 +1,27 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true.
----
-test
+Reproducible Research - Peer Assessment 1
+=========================================
 
 ## Loading and preprocessing the data
-
-
+```{r}
+actData <- read.csv("activity.csv", colClasses = "character")
+actData$steps <- as.numeric(actData$steps)
+actData$date <- as.Date(actData$date)
+actData$interval <- as.integer(actData$interval)
+```
 
 ## What is mean total number of steps taken per day?
+```{r}
+totalSteps <- aggregate(steps ~ date, data = actData, sum)
+hist(totalSteps$steps, main = "Histogram of Total Number of Steps Taken Per Day")
+```
 
-
+The mean of the total number of steps taken per day is `r mean(totalSteps$steps, na.rm = TRUE)` and the median is `r median(totalSteps$steps, na.rm = TRUE)`.
 
 ## What is the average daily activity pattern?
-
-
+```{r}
+dailyPattern <- aggregate(steps ~ interval, data = actData, mean)
+plot(dailyPattern, type = 'l')
+```
 
 ## Imputing missing values
 
